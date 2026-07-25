@@ -26,12 +26,14 @@ export default function ProductModal({ isOpen, onClose }: ProductModalProps) {
 
   if (!isOpen) return null;
 
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
+
   const lookupProduct = async () => {
     setLoadingLookup(true);
     setStatusMsg("");
     setProduct(null);
     try {
-      const res = await fetch("http://localhost:5001/api/lookup", {
+      const res = await fetch(`${backendUrl}/api/lookup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ product_name: query }),
@@ -54,7 +56,7 @@ export default function ProductModal({ isOpen, onClose }: ProductModalProps) {
     setSending(true);
     setStatusMsg("");
     try {
-      const res = await fetch("http://localhost:5001/api/send-alert", {
+      const res = await fetch(`${backendUrl}/api/send-alert`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ product }),

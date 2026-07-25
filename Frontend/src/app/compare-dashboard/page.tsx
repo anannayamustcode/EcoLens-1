@@ -99,7 +99,7 @@ export default function CompareDashboardPage() {
   const [isComparing, setIsComparing] = useState(false);
 
   // Replace this with your actual ngrok URL
-  const API_BASE_URL = "http://localhost:5001";
+  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
 
   const fetchProductData = async (folder: string): Promise<ProductData> => {
     try {

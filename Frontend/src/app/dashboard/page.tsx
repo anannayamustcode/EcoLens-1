@@ -107,7 +107,7 @@ export default function DashboardPage() {
   const [isAlternativeModalOpen, setIsAlternativeModalOpen] = useState(false);
 
   // Replace this with your actual ngrok URL
-  const API_BASE_URL = "http://localhost:5001"; // Update this to your ngrok URL when needed
+  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
 
   const getFolderName = (): string => {
     // Get folder name from URL params or return a default

@@ -56,8 +56,9 @@ export default function BarcodeInput({
     try {
       if (isSubmitting) return;
       setIsSubmitting(true);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
       // 1) Call backend proxy for ML get_barcode
-      const srcResp = await fetch(`http://localhost:5001/api/get_barcode?barcode=${encodeURIComponent(code)}`, {
+      const srcResp = await fetch(`${backendUrl}/api/get_barcode?barcode=${encodeURIComponent(code)}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
@@ -115,7 +116,7 @@ export default function BarcodeInput({
         manufacturing_loc: sanitizeSimple(product.manufacturing_location, 'Mumbai')
       };
 
-      const ecoResp = await fetch('http://localhost:5001/api/get-eco-score-proxy', {
+      const ecoResp = await fetch(`${backendUrl}/api/get-eco-score-proxy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ecoPayload)

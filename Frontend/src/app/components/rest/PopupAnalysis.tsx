@@ -174,8 +174,8 @@ export default function PopupAnalysis({ isOpen, onClose, product1Data, product2D
     setLoading(true);
     setError(null);
 
-    try {
-      const response = await fetch('http://localhost:5001/api/compare-products', {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
+      const response = await fetch(`${backendUrl}/api/compare-products`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

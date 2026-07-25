@@ -408,7 +408,7 @@ import {
 } from 'lucide-react';
 import Avatar from 'boring-avatars';
 
-const backendUrl = 'http://localhost:5001';
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
 
 const ProfilePage = () => {
   const [avatarSeed, setAvatarSeed] = useState<string>('');

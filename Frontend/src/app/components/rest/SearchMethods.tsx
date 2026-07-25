@@ -18,7 +18,8 @@ const handleUpload = async (file) => {
   formData.append('image', file); // Field name must match `upload.single("image")`
 
   try {
-    const res = await axios.post('http://localhost:5001/api/uploads', formData, {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
+    const res = await axios.post(`${backendUrl}/api/uploads`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     console.log('File saved to MongoDB:', res.data);
@@ -78,7 +79,8 @@ export default function SearchMethods({ onSubmit, className, value = 1, onUpload
 
   const handleEcoScore = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/get-eco-score-proxy", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
+      const response = await fetch(`${backendUrl}/api/get-eco-score-proxy`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -31,7 +31,8 @@ export default function Home() {
     try {
       console.log(`Extracting data from folder: ${folder}`);
       
-      const response = await fetch('http://localhost:5001/api/extract-labels', {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
+      const response = await fetch(`${backendUrl}/api/extract-labels`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

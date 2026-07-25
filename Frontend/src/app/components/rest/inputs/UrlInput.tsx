@@ -148,8 +148,9 @@ export default function UrlInput({ onSubmit }: UrlInputProps) {
   const handleUrlFlow = async (productUrl: string) => {
     try {
       setIsGeneratingReport(true);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
       // 1) Call backend proxy for ML get_url
-      const srcResp = await fetch(`http://localhost:5001/api/get_url?url=${encodeURIComponent(productUrl)}`, {
+      const srcResp = await fetch(`${backendUrl}/api/get_url?url=${encodeURIComponent(productUrl)}`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
@@ -208,7 +209,7 @@ export default function UrlInput({ onSubmit }: UrlInputProps) {
         manufacturing_loc: sanitizeSimple(product.manufacturing_location, 'Mumbai')
       };
 
-      const ecoResp = await fetch('http://localhost:5001/api/get-eco-score-proxy', {
+      const ecoResp = await fetch(`${backendUrl}/api/get-eco-score-proxy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ecoPayload)

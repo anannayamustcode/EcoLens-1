@@ -19,7 +19,7 @@ interface AuthResponse {
   message?: string;
 }
 
-const backendUrl = "http://localhost:5001"; // <-- Change to your backend URL
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
 
 const Login: React.FC = () => {
   const [currentState, setCurrentState] = useState<"login" | "signup">("login");

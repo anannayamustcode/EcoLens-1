@@ -26,15 +26,16 @@ export default function UploadInput({ onComplete, uploadEndpoint = 1, onUpload }
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getUploadUrl = () => {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
     switch (uploadEndpoint) {
       case 1:
-        return "http://localhost:5001/upload";
+        return `${backendUrl}/upload`;
       case 2:
-        return "http://localhost:5001/upload-product1";
+        return `${backendUrl}/upload-product1`;
       case 3:
-        return "http://localhost:5001/upload-product2";
+        return `${backendUrl}/upload-product2`;
       default:
-        return "http://localhost:5001/upload";
+        return `${backendUrl}/upload`;
     }
   };
 
@@ -137,8 +138,9 @@ const submitImages = async () => {
 
     // 2. Extract labels from the uploaded images
     console.log("Calling extract-labels API with folder:", getFolderName());
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
     const extractLabelsResponse = await fetch(
-      "http://localhost:5001/api/extract-labels",
+      `${backendUrl}/api/extract-labels`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -160,7 +162,7 @@ const submitImages = async () => {
     // 3. Get eco-score using the extracted data
     console.log("Now fetching eco-score...");
     const ecoScoreResponse = await fetch(
-      "http://localhost:5001/api/get-eco-score-proxy", // or use ML_NGROK_URL directly
+      `${backendUrl}/api/get-eco-score-proxy`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
