@@ -630,17 +630,15 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
-          </div>
-          
-      <div className="container mx-auto px-6 py-8 max-w-7xl">
+          </div>      <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-8 max-w-7xl">
         {/* Profile Header */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-green-100 relative overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-xl p-4 sm:p-8 mb-6 sm:mb-8 border border-green-100 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5"></div>
           <div className="relative z-10">
-            <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8">
+            <div className="flex flex-col md:flex-row items-center md:items-center text-center md:text-left space-y-4 md:space-y-0 md:space-x-8">
               {/* Avatar */}
               <div className="relative group">
-                <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-green-400 to-emerald-600 p-1 shadow-2xl">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-green-400 to-emerald-600 p-1 shadow-2xl">
                   <div className="w-full h-full rounded-3xl bg-white flex items-center justify-center overflow-hidden">
                 {avatarSeed && (
                   <Avatar
@@ -661,74 +659,74 @@ const ProfilePage = () => {
               </div>
               
               {/* Profile Info */}
-              <div className="flex-1">
-                <div className="flex items-center space-x-3 mb-2">
-                  <h2 className="text-3xl font-bold text-gray-900">{name || 'EcoScan User'}</h2>
+              <div className="flex-1 w-full">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{name || 'EcoScan User'}</h2>
                   <div className="px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full">
-                    <span className="text-white text-sm font-medium flex items-center">
+                    <span className="text-white text-xs sm:text-sm font-medium flex items-center">
                       <Award size={14} className="mr-1" />
                       {userStats.rank}
                     </span>
                   </div>
                 </div>
-                <p className="text-gray-600 mb-2">{email || 'No email provided'}</p>
-                <p className="text-gray-700 mb-4 max-w-2xl leading-relaxed">
+                <p className="text-sm text-gray-600 mb-2">{email || 'No email provided'}</p>
+                <p className="text-xs sm:text-sm text-gray-700 mb-4 max-w-2xl leading-relaxed">
                   {bio || 'Join me on my journey to make the world a greener place, one scan at a time! 🌱'}
                 </p>
                 
                 {/* Level Progress */}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">Level {userStats.level}</span>
-                    <span className="text-sm font-medium text-gray-600">{userStats.xp}/{userStats.xp + userStats.xpToNext} XP</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-600">Level {userStats.level}</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-600">{userStats.xp}/{userStats.xp + userStats.xpToNext} XP</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 sm:h-3">
                     <div 
-                      className="bg-gradient-to-r from-green-500 to-emerald-600 h-3 rounded-full transition-all duration-500"
+                      className="bg-gradient-to-r from-green-500 to-emerald-600 h-2.5 sm:h-3 rounded-full transition-all duration-500"
                       style={{ width: `${(userStats.xp / (userStats.xp + userStats.xpToNext)) * 100}%` }}
                     ></div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-[11px] text-gray-500 mt-1">
                     {userStats.xpToNext} XP to reach {nextLevel.name}
                   </p>
                 </div>
                 
                 {/* Quick Stats */}
-                <div className="flex flex-wrap gap-6">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-2 bg-green-100 rounded-lg">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-6 mt-4">
+                  <div className="flex items-center space-x-2 bg-green-50/60 p-2 rounded-xl">
+                    <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
                       <BarChart3 className="text-green-600" size={16} />
                     </div>
-              <div>
-                      <p className="text-sm text-gray-600">Total Scans</p>
-                      <p className="font-bold text-gray-900">{userStats.totalScans}</p>
+                    <div className="text-left">
+                      <p className="text-[11px] text-gray-600">Total Scans</p>
+                      <p className="font-bold text-xs sm:text-base text-gray-900">{userStats.totalScans}</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="p-2 bg-green-100 rounded-lg">
+                  <div className="flex items-center space-x-2 bg-green-50/60 p-2 rounded-xl">
+                    <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
                       <Target className="text-green-600" size={16} />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Eco Score</p>
-                      <p className="font-bold text-green-600">{userStats.ecoScore}</p>
+                    <div className="text-left">
+                      <p className="text-[11px] text-gray-600">Eco Score</p>
+                      <p className="font-bold text-xs sm:text-base text-green-600">{userStats.ecoScore}</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="p-2 bg-green-100 rounded-lg">
+                  <div className="flex items-center space-x-2 bg-green-50/60 p-2 rounded-xl">
+                    <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
                       <Sparkles className="text-green-600" size={16} />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Day Streak</p>
-                      <p className="font-bold text-orange-500">{userStats.streak}</p>
+                    <div className="text-left">
+                      <p className="text-[11px] text-gray-600">Day Streak</p>
+                      <p className="font-bold text-xs sm:text-base text-orange-500">{userStats.streak}</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="p-2 bg-green-100 rounded-lg">
+                  <div className="flex items-center space-x-2 bg-green-50/60 p-2 rounded-xl">
+                    <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
                       <Trophy className="text-green-600" size={16} />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Badges</p>
-                      <p className="font-bold text-gray-900">{userStats.badges}</p>
+                    <div className="text-left">
+                      <p className="text-[11px] text-gray-600">Badges</p>
+                      <p className="font-bold text-xs sm:text-base text-gray-900">{userStats.badges}</p>
                     </div>
                   </div>
                 </div>
@@ -736,7 +734,7 @@ const ProfilePage = () => {
 
               <button 
                 onClick={() => setEditingAvatar(!editingAvatar)}
-                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                className="w-full md:w-auto mt-4 md:mt-0 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 text-sm font-medium"
               >
                 <Pencil size={16} />
                 <span>Edit Profile</span>
@@ -746,24 +744,24 @@ const ProfilePage = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-white/60 backdrop-blur-lg p-2 rounded-2xl mb-8 border border-green-100">
+        <div className="flex overflow-x-auto scrollbar-none space-x-2 bg-white/60 backdrop-blur-lg p-1.5 sm:p-2 rounded-2xl mb-6 sm:mb-8 border border-green-100 flex-nowrap">
           {[
             { id: 'overview', label: 'Overview', icon: BarChart3 },
             { id: 'achievements', label: 'Achievements', icon: Trophy },
-            { id: 'impact', label: 'Environmental Impact', icon: Globe },
+            { id: 'impact', label: 'Impact', icon: Globe },
             { id: 'products', label: 'Recent Scans', icon: Camera }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-xl transition-all duration-300 ${
+              className={`flex-1 flex-shrink-0 flex items-center justify-center space-x-1.5 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all duration-300 ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg transform scale-105'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md font-semibold'
                   : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
               }`}
             >
-              <tab.icon size={18} />
-              <span className="font-medium">{tab.label}</span>
+              <tab.icon size={16} />
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
