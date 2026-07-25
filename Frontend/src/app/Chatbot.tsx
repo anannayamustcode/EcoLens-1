@@ -435,7 +435,6 @@ const qaPairs: Record<string, string> = {
                 ))}
               </div>
             </div> */}
-          )}
         </div>
       )}
     </div>

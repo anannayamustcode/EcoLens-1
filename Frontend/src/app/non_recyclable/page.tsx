@@ -101,7 +101,7 @@ export default function HorizontalScrollPage() {
             </ul>
           </li>
           <li>
-            <strong>Lesson:</strong> Shelf life > recyclability = large-scale
+            <strong>Lesson:</strong> Shelf life &gt; recyclability = large-scale
             waste.
           </li>
         </ul>
