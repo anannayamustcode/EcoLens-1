@@ -18,21 +18,27 @@ export default function BarcodeScanner({ onDetected }: BarcodeScannerProps) {
 
     const initScanner = async () => {
       try {
-        // Get available camera devices
-        const devices = await BrowserMultiFormatReader.listVideoInputDevices();
-        
-        // Prefer back camera for better barcode scanning
-        const backCamera = devices.find(device => 
-          device.label.toLowerCase().includes('back') || 
-          device.label.toLowerCase().includes('rear')
-        );
-        const selectedDeviceId = backCamera?.deviceId || devices[0]?.deviceId;
+        let selectedDeviceId: string | undefined;
 
-        if (selectedDeviceId && videoRef.current && isScanning) {
-          console.log('Starting barcode scanner...');
+        try {
+          const devices = await BrowserMultiFormatReader.listVideoInputDevices();
+          if (devices && devices.length > 0) {
+            const backCamera = devices.find(device => 
+              device.label.toLowerCase().includes('back') || 
+              device.label.toLowerCase().includes('rear') ||
+              device.label.toLowerCase().includes('environment')
+            );
+            selectedDeviceId = backCamera?.deviceId || devices[0]?.deviceId;
+          }
+        } catch (deviceErr) {
+          console.warn("Could not enumerate camera devices, using default camera", deviceErr);
+        }
+
+        if (videoRef.current && isScanning) {
+          console.log('Starting barcode scanner with device:', selectedDeviceId || 'default webcam');
           
           controlsRef.current = await codeReader.decodeFromVideoDevice(
-            selectedDeviceId,
+            selectedDeviceId || undefined,
             videoRef.current,
             (result, error, controls) => {
               if (result && !detectedRef.current) {
@@ -50,10 +56,6 @@ export default function BarcodeScanner({ onDetected }: BarcodeScannerProps) {
                 setTimeout(() => {
                   controls.stop();
                 }, 100);
-              }
-              
-              if (error && error.name !== 'NotFoundException') {
-                console.warn('Scanner error:', error);
               }
             }
           );

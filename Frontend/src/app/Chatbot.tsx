@@ -1,74 +1,81 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, ArrowRight, X, Mic, MicOff, Volume2, VolumeX, Leaf, Sparkles } from 'lucide-react';
+import { ArrowRight, X, Mic, MicOff, Volume2, VolumeX, Leaf, Sparkles, Bot, User as UserIcon } from 'lucide-react';
+
+interface Message {
+  text: string;
+  isUser: boolean;
+  time?: string;
+}
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Array<{ text: string, isUser: boolean }>>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechEnabled, setSpeechEnabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // const qaPairs = {
-  //   "What's my carbon footprint?": "Based on your recent activities, your carbon footprint is 2.1 tons CO₂ this month - 15% lower than average! Keep up the great work with sustainable choices.",
-  //   "How can I reduce waste?": "Here are some tips: Use reusable containers, compost organic waste, choose products with minimal packaging, and donate items instead of throwing them away."
-  // };
-const qaPairs: Record<string, string> = {
-  "What's my carbon footprint?": "Based on your recent activities, your carbon footprint is 2.1 tons CO₂ this month - 15% lower than average! Keep up the great work with sustainable choices.",
-  "How can I reduce waste?": "Here are some tips: Use reusable containers, compost organic waste, choose products with minimal packaging, and donate items instead of throwing them away."
-};
+  const quickQuestions = [
+    "How is EcoScore calculated?",
+    "Plastic recycling codes explained",
+    "How to compare two products?",
+    "Harmful ingredients to avoid",
+    "Reduce my carbon footprint"
+  ];
 
-  const keywordResponses: { [key: string]: string } = {
-    "carbon.*footprint|emissions": "🌱 Your carbon emissions this month: 2.1 tons CO₂ (15% below average)\n\nTop contributors:\n• Transportation: 45%\n• Energy use: 35%\n• Food choices: 20%\n\nSuggestion: Try cycling or public transport to reduce by 30%!",
-    "renewable.*energy|solar|wind": "☀️ Great choice! Renewable energy options available:\n\n• Solar panels: 25% cost reduction this year\n• Wind energy plans: Available in your area\n• Green energy providers: 3 options nearby\n\nEstimated savings: $180/month + 80% emission reduction",
-    "recycle|recycling|waste": "♻️ Smart recycling tips:\n\n• Separate plastics by number (1,2,5 accepted locally)\n• Glass & aluminum: 100% recyclable\n• Electronics: Drop-off at tech stores\n• Composting reduces waste by 30%\n\nNearest recycling center: 0.8 miles away",
-    "sustainable.*transport|electric.*car|bike": "🚲 Eco-friendly transport options:\n\n• E-bikes: 90% less emissions than cars\n• Public transit: Save $3,200/year\n• Car sharing: Available 5 locations nearby\n• Electric vehicles: $7,500 tax credit available",
-    "plant.*based|vegetarian|vegan": "🌿 Plant-based impact calculator:\n\nSwitching 3 meals/week saves:\n• 520 lbs CO₂/year\n• 133,000 gallons water\n• $520 annually\n\nTry: Meatless Mondays for easy start!"
+  const knowledgeBase: Record<string, string> = {
+    "how is ecoscore calculated": "🌱 **EcoScore Calculation Method**:\n\nEcoLens calculates a product's EcoScore (0-100) using 4 core metrics:\n\n1. **Lifecycle Assessment (LCA)** (35%): Raw material extraction, manufacturing emissions, and supply chain logistics.\n2. **Packaging Recyclability** (25%): Polymer type (PET, HDPE vs. Multi-layer plastics) & municipal recycling rate.\n3. **Ingredient Safety & Toxicity** (20%): Aquatic toxicity, microplastics, synthetic preservatives & palm oil sourcing.\n4. **Geographic Carbon Intensity** (20%): Sourcing distance from manufacturing origin to retail.\n\n*Scores above 75 are rated Grade A (Highly Sustainable).*",
+
+    "plastic recycling codes": "♻️ **Plastic Resin Identification Codes (1-7)**:\n\n• **#1 PETE / PET**: Water bottles — *Highly Recyclable*\n• **#2 HDPE**: Milk jugs, shampoo bottles — *Highly Recyclable*\n• **#3 PVC**: Piping & vinyl — *Rarely Recyclable / Toxic*\n• **#4 LDPE**: Shopping bags, squeeze bottles — *Moderate Recyclability*\n• **#5 PP**: Yogurt tubs, bottle caps — *Recyclable*\n• **#6 PS**: Styrofoam, disposable cutlery — *Non-Recyclable*\n• **#7 OTHER / Multi-Layer**: Sachets & snack pouches — *Landfill bound*",
+
+    "how to compare two products": "⚖️ **Product Comparison on EcoLens**:\n\n1. Click **Compare** in the navigation bar.\n2. Upload front & back images or enter URLs for **Product 1** and **Product 2**.\n3. Click **Compare** to generate a side-by-side analysis.\n4. EcoLens will highlight the winner based on carbon footprint, packaging grade, and eco-score!",
+
+    "harmful ingredients to avoid": "⚠️ **Ingredients to Avoid for Eco & Health Safety**:\n\n• **Microplastics / Polyethylene**: Harms marine ecosystems & marine life.\n• **Uncertified Palm Oil**: Drives tropical deforestation & habitat destruction.\n• **Phthalates & Parabens**: Endocrine disruptors and aquatic toxins.\n• **Sodium Lauryl Sulfate (SLS/SLES)**: High aquatic toxicity during disposal.\n• **Synthetic Fragrances**: Volatile organic compounds (VOCs) that degrade air quality.",
+
+    "reduce my carbon footprint": "🌍 **Top Actionable Tips to Reduce Your Footprint**:\n\n• **Switch to Refillables**: Choose bar soaps, shampoo concentrates, or glass containers.\n• **Scan Before Purchasing**: Use EcoLens barcode scanner to check products before buying.\n• **Buy Local**: Reduces transport emissions by up to 40%.\n• **Recycle Clean**: Rinse bottles before binning — dirty containers end up in landfills!",
+
+    "carbon footprint": "🌱 **Understanding Carbon Footprint**:\n\nCarbon footprint measures total greenhouse gases (CO₂e) emitted throughout a product's lifecycle:\n\n• **Raw Materials**: ~40% of emissions\n• **Manufacturing & Processing**: ~30%\n• **Transportation & Distribution**: ~20%\n• **Consumer Usage & Disposal**: ~10%\n\nScanning a product on EcoLens gives you its exact kg CO₂e impact!",
+
+    "government alert": "🚨 **Government Environmental Alert Feature**:\n\nIf you scan or lookup a product rated **Bad / Non-Compliant**, EcoLens enables a 1-click **Send Alert to Government** button. This sends an official report to environmental compliance authorities regarding toxic packaging or mislabeled claims."
   };
 
-  // Auto-scroll to bottom when new messages are added
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isLoading]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const speechRecognition = new (window as any).webkitSpeechRecognition();
-      speechRecognition.continuous = false;
-      speechRecognition.interimResults = false;
-      speechRecognition.lang = 'en-US';
+    if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const speechObj = new SpeechRecognition();
+      speechObj.continuous = false;
+      speechObj.interimResults = false;
+      speechObj.lang = 'en-US';
 
-      speechRecognition.onresult = (event: any) => {
+      speechObj.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         setInput(transcript);
         setIsRecording(false);
       };
 
-      speechRecognition.onerror = () => {
-        setIsRecording(false);
-      };
+      speechObj.onerror = () => setIsRecording(false);
+      speechObj.onend = () => setIsRecording(false);
 
-      speechRecognition.onend = () => {
-        setIsRecording(false);
-      };
-
-      setRecognition(speechRecognition);
+      setRecognition(speechObj);
     }
   }, []);
 
   const startRecording = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    e.stopPropagation();
     if (recognition && !isRecording) {
       setIsRecording(true);
       try {
         recognition.start();
-      } catch (error) {
-        console.error('Error starting recognition:', error);
+      } catch {
         setIsRecording(false);
       }
     }
@@ -76,7 +83,6 @@ const qaPairs: Record<string, string> = {
 
   const stopRecording = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    e.stopPropagation();
     if (recognition && isRecording) {
       recognition.stop();
       setIsRecording(false);
@@ -84,108 +90,109 @@ const qaPairs: Record<string, string> = {
   };
 
   const speak = (text: string) => {
-    if (!speechEnabled) return;
-    
-    // Stop any ongoing speech
+    if (!speechEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     
-    // Clean text for speech (remove emojis and special characters)
-    const cleanText = text.replace(/[^\w\s.,!?-]/g, ' ').replace(/\s+/g, ' ').trim();
-    
+    const cleanText = text.replace(/[*#•]/g, '').replace(/[^\w\s.,!?-]/g, ' ').replace(/\s+/g, ' ').trim();
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.2;
-    utterance.volume = 0.8;
-    
-    // Try to find a suitable voice
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
     const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice => 
-      voice.name.toLowerCase().includes('female') || 
-      voice.name.toLowerCase().includes('samantha') ||
-      voice.name.toLowerCase().includes('karen') ||
-      voice.name.toLowerCase().includes('susan')
-    ) || voices.find(voice => voice.lang.startsWith('en'));
-    
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-    
+    const preferredVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural')));
+    if (preferredVoice) utterance.voice = preferredVoice;
+
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
-    
+
     window.speechSynthesis.speak(utterance);
   };
 
-  const toggleSpeech = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setSpeechEnabled(!speechEnabled);
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
+  const generateSmartResponse = (query: string): string => {
+    const normalized = query.toLowerCase().trim();
+
+    // 1. Direct knowledge base match
+    for (const key in knowledgeBase) {
+      if (normalized.includes(key)) {
+        return knowledgeBase[key];
+      }
     }
+
+    // 2. Keyword-based intelligent synthesis
+    if (normalized.includes("recycle") || normalized.includes("waste") || normalized.includes("trash")) {
+      return knowledgeBase["plastic recycling codes"];
+    }
+    if (normalized.includes("ingredient") || normalized.includes("toxic") || normalized.includes("paraben") || normalized.includes("chemical")) {
+      return knowledgeBase["harmful ingredients to avoid"];
+    }
+    if (normalized.includes("score") || normalized.includes("grade") || normalized.includes("lca") || normalized.includes("calculate")) {
+      return knowledgeBase["how is ecoscore calculated"];
+    }
+    if (normalized.includes("compare") || normalized.includes("versus") || normalized.includes("better")) {
+      return knowledgeBase["how to compare two products"];
+    }
+    if (normalized.includes("alert") || normalized.includes("report") || normalized.includes("government")) {
+      return knowledgeBase["government alert"];
+    }
+    if (normalized.includes("carbon") || normalized.includes("emission") || normalized.includes("co2")) {
+      return knowledgeBase["carbon footprint"];
+    }
+
+    // 3. Conversational eco-intelligent response
+    return `🌿 **EcoLens Assistant**:
+\nThanks for asking about **"${query}"**! 
+
+To get the most accurate sustainability analysis:
+• Use the **Upload**, **URL**, or **Barcode** scanner on the home page to evaluate any consumer product.
+• Visit **Compare** to compare two products side-by-side.
+• Check out our **EcoScore** metrics to see detailed carbon footprint & ingredient breakdowns.
+
+*Feel free to ask me about plastic codes, carbon emissions, or harmful ingredients!*`;
   };
 
-  const handleSend = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    if (!input.trim() || isRecording) return;
-
-    const userMessage = input.trim();
-    setMessages(prev => [...prev, { text: userMessage, isUser: true }]);
+  const processUserQuery = async (queryText: string) => {
+    const userMsg: Message = { text: queryText, isUser: true, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    setMessages(prev => [...prev, userMsg]);
     setInput('');
+    setIsLoading(true);
 
-    const response = getCustomResponse(userMessage);
+    try {
+      // Try fetching from API if backend is connected
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecolens-backend-o8xg.onrender.com";
+      const response = await fetch(`${backendUrl}/api/get-eco-score-proxy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_name: queryText, brand: "Search", category: "General" }),
+      }).catch(() => null);
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { text: response, isUser: false }]);
-      if (speechEnabled) {
-        speak(response);
+      let responseText = "";
+      if (response && response.ok) {
+        const data = await response.json().catch(() => null);
+        if (data && data.lca_results) {
+          responseText = `🌱 **Product Sustainability Analysis for "${queryText}"**:\n\n• **EcoScore**: ${data.lca_results.eco_score}/100\n• **Carbon Footprint**: ${data.lca_results.total_emissions_kg_co2e} kg CO₂e\n• **Water Usage**: ${data.lca_results.water_usage_liters || 10} Liters\n• **Recyclability**: ${data.recyclability_analysis?.overall_recyclable ? "Recyclable ♻️" : "Non-Recyclable ⚠️"}`;
+        }
       }
-    }, 500);
-  };
 
-  const getCustomResponse = (userMessage: string): string => {
-    if (qaPairs[userMessage]) return qaPairs[userMessage];
-
-    for (const pattern in keywordResponses) {
-      const regex = new RegExp(pattern, "i");
-      if (regex.test(userMessage)) {
-        return keywordResponses[pattern];
+      if (!responseText) {
+        responseText = generateSmartResponse(queryText);
       }
+
+      const botMsg: Message = { text: responseText, isUser: false, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+      setMessages(prev => [...prev, botMsg]);
+      if (speechEnabled) speak(responseText);
+    } catch {
+      const fallbackText = generateSmartResponse(queryText);
+      setMessages(prev => [...prev, { text: fallbackText, isUser: false }]);
+      if (speechEnabled) speak(fallbackText);
+    } finally {
+      setIsLoading(false);
     }
-
-    return "I'd love to help you with sustainability questions! Ask me about carbon footprint, renewable energy, recycling, or sustainable living tips.";
   };
 
-  const handleQuestionClick = (question: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    setMessages(prev => [...prev, { text: question, isUser: true }]);
-    setTimeout(() => {
-      const response = qaPairs[question as keyof typeof qaPairs];
-      setMessages(prev => [...prev, { text: response, isUser: false }]);
-      if (speechEnabled) {
-        speak(response);
-      }
-    }, 500);
-  };
-
-  const toggleChatbot = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsOpen(!isOpen);
-  };
-
-  const closeChatbot = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsOpen(false);
+  const handleSend = () => {
+    if (!input.trim() || isRecording || isLoading) return;
+    processUserQuery(input.trim());
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -196,245 +203,174 @@ const qaPairs: Record<string, string> = {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
       {/* Floating Toggle Button */}
       <button
         type="button"
-        onClick={toggleChatbot}
-        className={`group relative w-16 h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-green-300/50 ${
-          isOpen
-            ? 'bg-transparent border border-transparent'
-            : 'bg-gradient-to-tr from-green-400 via-green-500 to-emerald-600 hover:from-green-500 hover:via-emerald-500 hover:to-green-600 shadow-green-300'
+        onClick={() => setIsOpen(!isOpen)}
+        className={`group relative w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none ${
+          isOpen ? 'bg-green-700' : 'bg-gradient-to-tr from-green-500 via-emerald-600 to-green-700 hover:from-green-600 hover:to-emerald-700'
         }`}
-        style={{ 
-          boxShadow: isOpen 
-            ? '0 20px 50px rgba(34, 197, 94, 0.3), 0 0 0 1px rgba(34, 197, 94, 0.1)' 
-            : '0 20px 50px rgba(34, 197, 94, 0.4), 0 8px 32px rgba(16, 185, 129, 0.3)',
-          zIndex: 1000
-        }}
-        aria-label="EcoAssistant"
+        aria-label="Toggle EcoAssistant"
       >
-        {/* Animated background effect */}
         {!isOpen && (
-          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-green-300/20 to-emerald-400/20 animate-ping pointer-events-none"></div>
+          <div className="absolute inset-0 rounded-full bg-green-400/30 animate-ping pointer-events-none"></div>
         )}
-        
-        <Leaf className="w-8 h-8 text-white transform group-hover:rotate-12 transition-transform duration-300" />
-        
-        {/* Sparkle effects */}
-        {!isOpen && (
+        {isOpen ? (
+          <X className="w-7 h-7 text-white" />
+        ) : (
           <>
-            <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-green-300 animate-pulse pointer-events-none" />
-            <Sparkles className="absolute -bottom-1 -left-1 w-3 h-3 text-emerald-300 animate-pulse pointer-events-none" style={{ animationDelay: '1s' }} />
+            <Leaf className="w-7 h-7 text-white transform group-hover:rotate-12 transition-transform duration-300" />
+            <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-green-200 animate-pulse pointer-events-none" />
           </>
         )}
       </button>
 
-      {/* Chat Window */}
+      {/* Chat Window - Responsive for Mobile & Desktop */}
       {isOpen && (
-        <div 
-          className="absolute bottom-1 right-0 w-[380px] h-[520px] bg-gradient-to-br from-green-50/95 via-white/95 to-emerald-50/95 backdrop-blur-2xl rounded-3xl shadow-2xl flex flex-col border-2 border-green-200/60 overflow-hidden z-100"
-          style={{ 
-            boxShadow: '0 25px 80px rgba(34, 197, 94, 0.25), 0 0 0 1px rgba(34, 197, 94, 0.1)',
-            zIndex: 999
-          }}
-        >
-          {/* Magical Header */}
-          <div className="relative bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 text-white p-4">
-            {/* Animated background patterns */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className="absolute top-0 left-0 w-32 h-32 bg-green-400/20 rounded-full -translate-x-16 -translate-y-16"></div>
-              <div className="absolute bottom-0 right-0 w-24 h-24 bg-emerald-400/20 rounded-full translate-x-12 translate-y-12"></div>
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent"></div>
+        <div className="fixed inset-x-3 bottom-20 sm:inset-auto sm:bottom-2 sm:right-0 w-[calc(100vw-1.5rem)] sm:w-[380px] max-w-[420px] h-[78vh] sm:h-[530px] max-h-[600px] bg-gradient-to-br from-green-50/95 via-white/95 to-emerald-50/95 backdrop-blur-2xl rounded-3xl shadow-2xl flex flex-col border-2 border-green-300/60 overflow-hidden z-50">
+          
+          {/* Header */}
+          <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-green-700 text-white p-3.5 flex justify-between items-center shadow-md">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base tracking-wide flex items-center gap-1.5">
+                  EcoAssistant
+                  <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
+                </h3>
+                <p className="text-[11px] text-green-100 font-medium">AI Sustainability Guide</p>
+              </div>
             </div>
 
-            {/* Floating particles effect */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-4 left-8 w-1 h-1 bg-white/40 rounded-full animate-pulse"></div>
-              <div className="absolute top-8 right-12 w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-              <div className="absolute bottom-6 left-16 w-1 h-1 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-            </div>
-
-            {/* Controls - Fixed positioning and z-index */}
-            <div className="absolute top-3 right-3 flex gap-2" style={{ zIndex: 50 }}>
+            <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={toggleSpeech}
-                className="relative text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/30"
-                title={speechEnabled ? "Disable voice" : "Enable voice"}
-                aria-label={speechEnabled ? "Disable voice" : "Enable voice"}
-                style={{ zIndex: 51 }}
+                onClick={() => {
+                  setSpeechEnabled(!speechEnabled);
+                  if (isSpeaking) window.speechSynthesis.cancel();
+                }}
+                className="text-white/80 hover:text-white hover:bg-white/20 p-1.5 rounded-lg transition-colors"
+                title={speechEnabled ? "Mute Voice" : "Enable Voice"}
               >
                 {speechEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
               <button
                 type="button"
-                onClick={closeChatbot}
-                className="relative text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-300 hover:scale-105 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/30"
-                aria-label="Close chatbot"
-                style={{ zIndex: 51 }}
+                onClick={() => setIsOpen(false)}
+                className="text-white/80 hover:text-white hover:bg-white/20 p-1.5 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-
-            <div className="relative" style={{ zIndex: 20 }}>
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-                    <Leaf className="w-6 h-6 text-white" />
-                  </div>
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 bg-white/20 rounded-2xl blur-sm -z-10 pointer-events-none"></div>
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg tracking-wide">EcoAssistant</h3>
-                </div>
-              </div>
-              
-              {isSpeaking && (
-                <div className="flex items-center gap-3 mt-3 bg-white/10 rounded-xl p-2 backdrop-blur-sm">
-                  <div className="flex gap-1">
-                    <div className="w-1 h-3 bg-white/70 rounded-full animate-bounce"></div>
-                    <div className="w-1 h-4 bg-white/90 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-1 h-2 bg-white/70 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-1 h-3 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
-                  </div>
-                  <span className="text-xs text-white/90 font-medium">Speaking...</span>
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* Messages Area */}
-          <div className="flex-1 p-4 overflow-y-auto bg-gradient-to-b from-transparent to-green-50/30">
+          {/* Quick Questions Toolbar */}
+          <div className="px-3 py-2 bg-green-100/60 border-b border-green-200/50 overflow-x-auto whitespace-nowrap scrollbar-none flex gap-1.5">
+            {quickQuestions.map((q, idx) => (
+              <button
+                key={idx}
+                onClick={() => processUserQuery(q)}
+                className="text-[11px] bg-white hover:bg-green-600 hover:text-white text-green-800 font-medium px-2.5 py-1 rounded-full border border-green-300/60 shadow-sm transition-all flex-shrink-0"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {/* Messages Container */}
+          <div className="flex-1 p-3.5 overflow-y-auto space-y-3.5">
             {messages.length === 0 ? (
-              <div className="text-center mt-16">
-                <div className="relative mx-auto mb-6 w-20 h-20">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-green-400 to-emerald-500 rounded-3xl flex items-center justify-center shadow-lg">
-                    <Leaf className="w-10 h-10 text-white" />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-tr from-green-300/40 to-emerald-400/40 rounded-3xl animate-ping pointer-events-none"></div>
-                  <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-green-400 animate-pulse pointer-events-none" />
+              <div className="text-center py-8 px-2">
+                <div className="w-14 h-14 bg-gradient-to-tr from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-green-200">
+                  <Leaf className="w-8 h-8 text-white" />
                 </div>
-                {/* <h4 className="text-xl font-bold text-green-700 mb-2">Let's Save the Planet! 🌍</h4> */}
-                <p className="text-sm text-green-600 leading-relaxed px-4">Ask me anything about sustainability, green living, or eco-friendly tips!</p>
+                <h4 className="font-bold text-green-900 text-base mb-1">Hi! I'm EcoAssistant 🌿</h4>
+                <p className="text-xs text-gray-600 max-w-[260px] mx-auto leading-relaxed">
+                  Ask me about product EcoScores, carbon footprints, plastic recycling codes, or eco-friendly alternatives!
+                </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`relative max-w-[85%] p-4 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl ${
-                        msg.isUser
-                          ? 'bg-gradient-to-br from-green-500 via-emerald-500 to-green-600 text-white rounded-br-md border border-green-400/20'
-                          : 'bg-white/90 border-2 border-green-200/50 text-gray-800 rounded-bl-md backdrop-blur-sm'
-                      }`}
-                    >
-                      <p className={`text-sm leading-relaxed ${msg.isUser ? 'text-white' : 'text-gray-800'} whitespace-pre-line`}>
-                        {msg.text}
-                      </p>
-                      {/* Message glow effect */}
-                      {msg.isUser && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-2xl blur-sm -z-10 pointer-events-none"></div>
-                      )}
-                    </div>
+              messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex items-start gap-2 ${msg.isUser ? 'flex-row-reverse' : 'flex-row'}`}
+                >
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5 ${
+                    msg.isUser ? 'bg-green-600 text-white' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  }`}>
+                    {msg.isUser ? <UserIcon size={14} /> : <Bot size={14} />}
                   </div>
-                ))}
-                <div ref={messagesEndRef} />
+                  <div
+                    className={`max-w-[82%] p-3 rounded-2xl text-xs leading-relaxed shadow-sm ${
+                      msg.isUser
+                        ? 'bg-green-600 text-white rounded-tr-none'
+                        : 'bg-white border border-green-200/80 text-gray-800 rounded-tl-none whitespace-pre-line'
+                    }`}
+                  >
+                    {msg.text}
+                    {msg.time && (
+                      <div className={`text-[9px] mt-1 text-right ${msg.isUser ? 'text-green-100' : 'text-gray-400'}`}>
+                        {msg.time}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+
+            {isLoading && (
+              <div className="flex items-center gap-2 text-xs text-green-700 bg-white/80 p-2.5 rounded-2xl w-max border border-green-200">
+                <div className="w-2 h-2 bg-green-600 rounded-full animate-ping"></div>
+                Thinking eco-friendly answers...
               </div>
             )}
+
+            <div ref={messagesEndRef} />
           </div>
 
-          {/* Enhanced Input Area */}
-          <div className="p-4 bg-gradient-to-r from-green-50/80 via-white/80 to-emerald-50/80 backdrop-blur-sm border-t-2 border-green-200/30">
-            <div className="relative">
-              <div 
-                className="flex items-center bg-white/90 rounded-2xl border-2 border-green-300/40 focus-within:border-green-500 focus-within:shadow-lg focus-within:shadow-green-200/50 transition-all duration-300 backdrop-blur-sm overflow-hidden"
-                style={{
-                  boxShadow: 'inset 0 2px 4px rgba(34, 197, 94, 0.1)'
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder={isRecording ? "🎤 Listening..." : "Ask me anything green..."}
-                  className="flex-1 px-4 py-3 text-gray-700 bg-transparent text-sm focus:outline-none placeholder-green-500/70 font-medium"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  disabled={isRecording}
-                />
-                
-                {/* Voice Button */}
-                {recognition && (
-                  <button
-                    type="button"
-                    onMouseDown={startRecording}
-                    onMouseUp={stopRecording}
-                    onTouchStart={startRecording}
-                    onTouchEnd={stopRecording}
-                    className={`relative p-3 rounded-full transition-all duration-300 mx-1 focus:outline-none focus:ring-2 focus:ring-green-300 ${
-                      isRecording 
-                        ? 'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-200 animate-pulse scale-110' 
-                        : 'text-green-600 hover:text-green-700 hover:bg-green-100 hover:scale-105'
-                    }`}
-                    title={isRecording ? "Release to stop" : "Hold to record voice"}
-                    aria-label={isRecording ? "Recording voice input" : "Start voice input"}
-                  >
-                    {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                    
-                    {/* Recording pulse effect */}
-                    {isRecording && (
-                      <div className="absolute inset-0 bg-red-400/40 rounded-full animate-ping pointer-events-none"></div>
-                    )}
-                  </button>
-                )}
-                
-                {/* Send Button */}
+          {/* Input Area */}
+          <div className="p-3 bg-white border-t border-green-200/60">
+            <div className="flex items-center bg-gray-50 rounded-2xl border border-green-300/60 focus-within:border-green-600 focus-within:bg-white px-2 py-1 transition-all">
+              <input
+                type="text"
+                placeholder={isRecording ? "🎤 Listening..." : "Type your eco question..."}
+                className="flex-1 px-2 py-1.5 text-xs text-gray-800 bg-transparent focus:outline-none placeholder-gray-400"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyPress}
+                disabled={isRecording || isLoading}
+              />
+
+              {recognition && (
                 <button
                   type="button"
-                  onClick={handleSend}
-                  className="p-3 text-green-600 hover:text-white hover:bg-gradient-to-br hover:from-green-500 hover:to-emerald-600 rounded-r-2xl transition-all duration-300 hover:shadow-lg hover:shadow-green-200 group focus:outline-none focus:ring-2 focus:ring-green-300"
-                  disabled={isRecording || !input.trim()}
-                  aria-label="Send message"
+                  onMouseDown={startRecording}
+                  onMouseUp={stopRecording}
+                  onTouchStart={startRecording}
+                  onTouchEnd={stopRecording}
+                  className={`p-1.5 rounded-full text-xs transition-colors mr-1 ${
+                    isRecording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 hover:text-green-600'
+                  }`}
+                  title={isRecording ? "Release to stop" : "Hold to talk"}
                 >
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                  {isRecording ? <MicOff size={16} /> : <Mic size={16} />}
                 </button>
-              </div>
-              
-              {isRecording && (
-                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-medium shadow-lg pointer-events-none">
-                  Release when done
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-green-600"></div>
-                </div>
               )}
+
+              <button
+                type="button"
+                onClick={handleSend}
+                disabled={!input.trim() || isRecording || isLoading}
+                className="p-1.5 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-40 transition-colors"
+              >
+                <ArrowRight size={16} />
+              </button>
             </div>
           </div>
 
-          {/* Enhanced Quick Questions */}
-          {/* {messages.length === 0 && (
-            <div className="p-4 pt-0 bg-gradient-to-r from-green-50/80 via-white/80 to-emerald-50/80 backdrop-blur-sm">
-              <p className="text-sm font-bold text-green-700 mb-3 flex items-center gap-2">
-                <span className="text-lg">🌱</span> Quick start:
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {Object.keys(qaPairs).map((question, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={(e) => handleQuestionClick(question, e)}
-                    className="group relative text-xs bg-gradient-to-r from-green-100 to-emerald-100 hover:from-green-200 hover:to-emerald-200 text-green-700 px-4 py-2.5 rounded-2xl border-2 border-green-200/60 hover:border-green-300 transition-all duration-300 hover:shadow-lg hover:shadow-green-200/50 hover:scale-105 font-medium focus:outline-none focus:ring-2 focus:ring-green-300/50"
-                    aria-label={`Ask: ${question}`}
-                  >
-                    {question}
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-300/20 to-emerald-300/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-sm -z-10 pointer-events-none"></div>
-                  </button>
-                ))}
-              </div>
-            </div> */}
         </div>
       )}
     </div>

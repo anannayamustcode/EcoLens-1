@@ -59,7 +59,7 @@ const Navbar = () => {
             <img src="/assets/ecologo.png" alt="EcoLens Logo" className="w-full h-full object-contain" />
           </div>
           <h1>
-            <Link href="/" className="text-2xl font-bold">EcoLens</Link>
+            <Link href="/" className="text-2xl font-bold hidden sm:inline">EcoLens</Link>
           </h1>
         </div>
 

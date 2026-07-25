@@ -38,16 +38,21 @@ export default function CameraInput({ onCapture }: CameraInputProps) {
     setError(null);
 
     try {
-      const constraints = {
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: 'environment'
-        },
-        audio: false
-      };
-
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      let mediaStream: MediaStream;
+      try {
+        const constraints = {
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: { ideal: 'environment' }
+          },
+          audio: false
+        };
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (firstErr) {
+        console.warn("Environmental camera failed, falling back to default webcam", firstErr);
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
