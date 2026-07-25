@@ -83,13 +83,25 @@ router.post("/send-alert", async (req, res) => {
     if (!prod) return res.status(400).json({ error: "product object required" });
 
     // Double-check status server-side
-    const ecoScore = Number(prod.eco_score);
-    const ideal = Number(prod.ideal_eco_score);
+    const ecoScore = Number(prod.eco_score || 0);
+    const ideal = Number(prod.ideal_eco_score || 0);
     const diff = ecoScore - ideal;
-    const status = diff >= 2 ? "Very Good" : (diff <= -2 ? "Bad" : "Good");
+    const status = prod.eco_status || (diff >= 2 ? "Very Good" : (diff <= -2 ? "Bad" : "Good"));
 
     if (status !== "Bad") {
       return res.status(400).json({ error: "Product is not flagged as Bad. No alert sent." });
+    }
+
+    const senderEmail = process.env.SENDER_EMAIL;
+    const senderPass = process.env.SENDER_PASSWORD;
+    const targetEmail = process.env.GOV_EMAIL || senderEmail;
+
+    if (!senderEmail || !senderPass) {
+      console.warn("⚠️ Alert triggered, but SENDER_EMAIL or SENDER_PASSWORD environment variables are missing on Render.");
+      return res.json({ 
+        message: "Alert logged! (To receive live email alerts, set SENDER_EMAIL and SENDER_PASSWORD on Render)",
+        simulated: true
+      });
     }
 
     // Build HTML content (single-product)
@@ -100,19 +112,20 @@ router.post("/send-alert", async (req, res) => {
     tableHTML += "</table>";
 
     const mailOptions = {
-      from: `"Eco Lens" <${process.env.SENDER_EMAIL}>`,
-      to: process.env.GOV_EMAIL,
-      subject: `Eco Lens Alert — Product flagged: ${prod.product_name}`,
-      html: `<p>Dear Government Official,</p>
-             <p>The following product has been flagged for failing eco factor compliance:</p>
+      from: `"Eco Lens" <${senderEmail}>`,
+      to: targetEmail,
+      subject: `Eco Lens Alert — Product flagged: ${prod.product_name || "Non-Compliant Product"}`,
+      html: `<p>Dear Government Official / Compliance Officer,</p>
+             <p>The following product has been flagged on EcoLens for failing environmental compliance:</p>
              ${tableHTML}
              <p>Regards,<br/>Eco Lens Team</p>`,
     };
 
     await transporter.sendMail(mailOptions);
-    res.json({ message: "Alert sent to government" });
+    res.json({ message: `Alert sent successfully to ${targetEmail}!` });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Failed to dispatch government alert email:", err);
+    res.status(500).json({ error: `Email Error: ${err.message}` });
   }
 });
 
