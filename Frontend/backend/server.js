@@ -10,7 +10,7 @@ import { fileURLToPath } from "url";
 import userRouter from './routes/userRoute.js';
 import productRouter from "./routes/productRoute.js";
 import uploadRoutes from "./routes/uploadRoute.js";
-import ecoRoutes from "./routes/ecoRoutes.js"; // note the .js extension
+import ecoRoutes from "./routes/EcoRoutes.js"; // note the .js extension
 
 dotenv.config();
 
