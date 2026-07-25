@@ -134,7 +134,7 @@ export default function Home() {
       <HeroSection />
       
       {/* Product Upload Sections */}
-      <div className="flex w-full gap-4 px-4">
+      <div className="flex flex-col lg:flex-row w-full gap-4 px-4 max-w-7xl mx-auto">
         <SearchMethods 
           value={2} 
           onSubmit={handleSearchSubmit} 
