@@ -31,7 +31,7 @@ const Chatbot = () => {
   const knowledgeBase: Record<string, string> = {
     "how is ecoscore calculated": "🌱 **EcoScore Calculation Method**:\n\nEcoLens calculates a product's EcoScore (0-100) using 4 core metrics:\n\n1. **Lifecycle Assessment (LCA)** (35%): Raw material extraction, manufacturing emissions, and supply chain logistics.\n2. **Packaging Recyclability** (25%): Polymer type (PET, HDPE vs. Multi-layer plastics) & municipal recycling rate.\n3. **Ingredient Safety & Toxicity** (20%): Aquatic toxicity, microplastics, synthetic preservatives & palm oil sourcing.\n4. **Geographic Carbon Intensity** (20%): Sourcing distance from manufacturing origin to retail.\n\n*Scores above 75 are rated Grade A (Highly Sustainable).*",
 
-    "plastic recycling codes": "♻️ **Plastic Resin Identification Codes (1-7)**:\n\n• **#1 PETE / PET**: Water bottles — *Highly Recyclable*\n• **#2 HDPE**: Milk jugs, shampoo bottles — *Highly Recyclable*\n• **#3 PVC**: Piping & vinyl — *Rarely Recyclable / Toxic*\n• **#4 LDPE**: Shopping bags, squeeze bottles — *Moderate Recyclability*\n• **#5 PP**: Yogurt tubs, bottle caps — *Recyclable*\n• **#6 PS**: Styrofoam, disposable cutlery — *Non-Recyclable*\n• **#7 OTHER / Multi-Layer**: Sachets & snack pouches — *Landfill bound*",
+    "plastic recycling codes": "♻️ **Plastic Resin Identification Codes (1-7)**:\n\n• **#1 PETE / PET**: Water bottles — **Highly Recyclable**\n• **#2 HDPE**: Milk jugs, shampoo bottles — **Highly Recyclable**\n• **#3 PVC**: Piping & vinyl — **Rarely Recyclable / Toxic**\n• **#4 LDPE**: Shopping bags, squeeze bottles — **Moderate Recyclability**\n• **#5 PP**: Yogurt tubs, bottle caps — **Recyclable**\n• **#6 PS**: Styrofoam, disposable cutlery — **Non-Recyclable**\n• **#7 OTHER / Multi-Layer**: Sachets & snack pouches — **Landfill bound**",
 
     "how to compare two products": "⚖️ **Product Comparison on EcoLens**:\n\n1. Click **Compare** in the navigation bar.\n2. Upload front & back images or enter URLs for **Product 1** and **Product 2**.\n3. Click **Compare** to generate a side-by-side analysis.\n4. EcoLens will highlight the winner based on carbon footprint, packaging grade, and eco-score!",
 
@@ -109,17 +109,52 @@ const Chatbot = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+  // Helper to format bold markdown text smoothly without raw **
+  const renderFormattedText = (text: string) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, idx) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={idx} className="font-semibold text-green-950">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+  };
+
   const generateSmartResponse = (query: string): string => {
     const normalized = query.toLowerCase().trim();
 
-    // 1. Direct knowledge base match
+    // 1. Check Greetings (hi, hello, hey, heyy, heyyy, yo, sup, etc.)
+    const greetingsRegex = /^(h+i+|h+e+l+o+|h+e+y+|y+o+|s+u+p+|h+o+w+d+y|good\s*morning|good\s*afternoon|good\s*evening|greetings|hola|namaste)$/i;
+    if (greetingsRegex.test(normalized) || /^h[eiys]+/i.test(normalized)) {
+      return "Hey there! 👋 Welcome to **EcoLens**. I'm your AI Sustainability Assistant. How can I help you today?\n\nYou can ask me about **EcoScores**, **plastic recycling codes**, **product comparisons**, or **eco-friendly tips**!";
+    }
+
+    // 2. Check Farewells (bye, byee, goodbye, cya, see ya, etc.)
+    const farewellsRegex = /^(b+y+e+|g+o+o+d+b+y+e+|c+y+a+|s+e+e+\s*y+a+|s+e+e+\s*y+o+u+|g+o+o+d+n+i+g+h+t|night|take\s*care|ttyl)$/i;
+    if (farewellsRegex.test(normalized)) {
+      return "Goodbye! 🌱 Keep making conscious, sustainable choices for our planet. See you next time!";
+    }
+
+    // 3. Check Thanks / Gratitude
+    const thanksRegex = /^(thanks+|thank\s*you+|thx|ty|awesome|great|cool|perfect|amazing)$/i;
+    if (thanksRegex.test(normalized)) {
+      return "You're very welcome! 💚 I'm always here to help you make greener, more sustainable decisions!";
+    }
+
+    // 4. Check Bot Identity / Help
+    const identityRegex = /(who\s*are\s*you|what\s*is\s*your\s*name|what\s*can\s*you\s*do|help|what\s*are\s*you)/i;
+    if (identityRegex.test(normalized)) {
+      return "I am **EcoAssistant** 🤖🌱, your AI sustainability companion on EcoLens!\n\nI can help you:\n• Decode **plastic recycling codes** (1-7)\n• Calculate product **carbon footprints**\n• Compare two products side-by-side\n• Spot **harmful ingredients** to avoid";
+    }
+
+    // 5. Direct Knowledge Base matches
     for (const key in knowledgeBase) {
       if (normalized.includes(key)) {
         return knowledgeBase[key];
       }
     }
 
-    // 2. Keyword-based intelligent synthesis
+    // 6. Topic Keyword matching
     if (normalized.includes("recycle") || normalized.includes("waste") || normalized.includes("trash")) {
       return knowledgeBase["plastic recycling codes"];
     }
@@ -139,14 +174,14 @@ const Chatbot = () => {
       return knowledgeBase["carbon footprint"];
     }
 
-    // 3. Conversational eco-intelligent response
+    // 7. General Friendly Eco Response
     return `🌿 **EcoLens Assistant**:
-\nThanks for asking about **"${query}"**! 
+\nI'd love to help you with that! 
 
-To get the most accurate sustainability analysis:
-• Use the **Upload**, **URL**, or **Barcode** scanner on the home page to evaluate any consumer product.
+To analyze any product's sustainability footprint:
+• Use the **Upload**, **URL**, or **Barcode** scanner on the home page.
 • Visit **Compare** to compare two products side-by-side.
-• Check out our **EcoScore** metrics to see detailed carbon footprint & ingredient breakdowns.
+• Check out our **EcoScore** metrics for carbon & ingredient breakdowns.
 
 *Feel free to ask me about plastic codes, carbon emissions, or harmful ingredients!*`;
   };
@@ -310,7 +345,7 @@ To get the most accurate sustainability analysis:
                         : 'bg-white border border-green-200/80 text-gray-800 rounded-tl-none whitespace-pre-line'
                     }`}
                   >
-                    {msg.text}
+                    {msg.isUser ? msg.text : renderFormattedText(msg.text)}
                     {msg.time && (
                       <div className={`text-[9px] mt-1 text-right ${msg.isUser ? 'text-green-100' : 'text-gray-400'}`}>
                         {msg.time}
