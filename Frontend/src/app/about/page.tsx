@@ -5,33 +5,28 @@ import React from "react";
 export default function AboutPage() {
   const teamMembers = [
     {
-      name: "Anannaya",
+      name: "Loheyta",
       image: "/assets/team/member1.jpg",
-      role: "Lead Developer & Strategy",
-      initial: "A"
+      initial: "L"
     },
     {
       name: "Ishita",
       image: "/assets/team/member2.jpg",
-      role: "Full-Stack & ML Research",
       initial: "I"
     },
     {
-      name: "Loheyta",
+      name: "Anannaya",
       image: "/assets/team/member3.jpg",
-      role: "UI/UX & Product Design",
-      initial: "L"
+      initial: "A"
     },
     {
       name: "Prisha",
       image: "/assets/team/member4.jpg",
-      role: "Data Science & Sustainability",
       initial: "P"
     },
     {
       name: "Sakshi",
       image: "/assets/team/member5.jpg",
-      role: "Environmental Policy & Analytics",
       initial: "S"
     }
   ];
@@ -61,7 +56,7 @@ export default function AboutPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               
               {/* Photo Avatar */}
-              <div className="relative mb-5">
+              <div className="relative mb-4">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-emerald-400 via-teal-500 to-green-400 shadow-xl group-hover:scale-105 transition-transform duration-300 overflow-hidden">
                   <img
                     src={member.image}
@@ -76,9 +71,8 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Member Details */}
-              <h2 className="text-xl font-bold text-gray-900 mb-1">{member.name}</h2>
-              <p className="text-xs font-semibold text-emerald-700 mb-3">{member.role}</p>
+              {/* Member Name */}
+              <h2 className="text-xl font-bold text-gray-900 mb-3">{member.name}</h2>
 
               <div className="w-10 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full mt-auto"></div>
             </div>
