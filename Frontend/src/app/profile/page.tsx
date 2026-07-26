@@ -693,25 +693,7 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="container mx-auto py-4 px-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Leaf className="text-green-600 mr-3" size={32} />
-              <h1 className="text-3xl font-bold text-green-800">EcoScan Profile</h1>
-        </div>
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                <Settings size={20} />
-              </button>
-              <button className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                <Share2 size={20} />
-            </button>
-            </div>
-          </div>
-        </div>
-          </div>      <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-8 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-8 max-w-7xl">
         {/* Profile Header */}
         <div className="bg-white rounded-3xl shadow-xl p-4 sm:p-8 mb-6 sm:mb-8 border border-green-100 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5"></div>
