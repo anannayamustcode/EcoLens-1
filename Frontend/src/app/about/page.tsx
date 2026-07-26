@@ -6,27 +6,27 @@ export default function AboutPage() {
   const teamMembers = [
     {
       name: "Loheyta",
-      image: "/assets/team/member1.jpg",
+      image: "/assets/team/Loheyta.jpg",
       initial: "L"
     },
     {
       name: "Ishita",
-      image: "/assets/team/member2.jpg",
+      image: "/assets/team/Ishita.jpg",
       initial: "I"
     },
     {
       name: "Anannaya",
-      image: "/assets/team/member3.jpg",
+      image: "/assets/team/Anannaya.jpg",
       initial: "A"
     },
     {
       name: "Prisha",
-      image: "/assets/team/member4.jpg",
+      image: "/assets/team/Prisha.jpg",
       initial: "P"
     },
     {
       name: "Sakshi",
-      image: "/assets/team/member5.jpg",
+      image: "/assets/team/Sakshi.jpg",
       initial: "S"
     }
   ];
