@@ -24,12 +24,23 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedToken = localStorage.getItem("token");
-      const savedAvatar = localStorage.getItem("userAvatar");
-      if (savedToken) setToken(savedToken);
-      if (savedAvatar) setAvatar(savedAvatar);
-    }
+    const syncAuth = () => {
+      if (typeof window !== "undefined") {
+        const savedToken = localStorage.getItem("token");
+        const savedAvatar = localStorage.getItem("userAvatar");
+        setToken(savedToken);
+        if (savedAvatar) setAvatar(savedAvatar);
+      }
+    };
+
+    syncAuth();
+    window.addEventListener("storage", syncAuth);
+    window.addEventListener("authChange", syncAuth);
+
+    return () => {
+      window.removeEventListener("storage", syncAuth);
+      window.removeEventListener("authChange", syncAuth);
+    };
   }, []);
 
   // Close dropdown when clicking outside
@@ -66,15 +77,14 @@ const Navbar = () => {
         {/* Navigation */}
         <nav>
           <ul className="flex space-x-3 sm:space-x-6 text-sm sm:text-base items-center">
-            <li><Link href="/" className="hover:underline">Home</Link></li>
-            {/* <li><Link href="/dashboard" className="hover:underline">Dashboard</Link></li> */}
-            <li><Link href="/compare" className="hover:underline">Compare</Link></li>
-            <li><Link href="/about" className="hover:underline">About</Link></li>
+            <li><Link href="/" className="hover:underline font-medium">Home</Link></li>
+            <li><Link href="/compare" className="hover:underline font-medium">Compare</Link></li>
+            <li><Link href="/about" className="hover:underline font-medium">About</Link></li>
 
             {/* Profile with click dropdown */}
             <li className="relative cursor-pointer profile-dropdown-container">
               <div
-                className="w-9 h-9 rounded-full border-2 border-green-400 shadow-md overflow-hidden transition-transform hover:scale-105 bg-white"
+                className="w-9 h-9 rounded-full border-2 border-green-300 shadow-md overflow-hidden transition-transform hover:scale-105 bg-white flex items-center justify-center"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 {avatar ? (
@@ -85,40 +95,47 @@ const Navbar = () => {
                     onError={() => setAvatar(null)}
                   />
                 ) : (
-                  <div className="flex items-center justify-center w-full h-full bg-green-100 text-green-600">
-                    <User size={20} />
+                  <div className="flex items-center justify-center w-full h-full bg-green-100 text-green-700 font-bold text-sm">
+                    <User size={18} />
                   </div>
                 )}
               </div>
 
-              {/* Always show dropdown when open, regardless of login status */}
+              {/* Dynamic Dropdown Menu based on Auth State */}
               {isDropdownOpen && (
-                <div className="absolute right-0 pt-4">
-                  <div className="flex flex-col gap-2 w-36 py-3 px-5 bg-slate-100 text-gray-700 rounded-md shadow-lg z-100">
-                    <p
-                      onClick={() => {
-                        router.push("/profile");
-                        setIsDropdownOpen(false);
-                      }}
-                      className="cursor-pointer hover:text-black"
-                    >
-                      My Profile
-                    </p>
-                    <p
-                      onClick={() => {
-                        router.push("/login");
-                        setIsDropdownOpen(false);
-                      }}
-                      className="cursor-pointer hover:text-black"
-                    >
-                      Login
-                    </p>
-                    <p
-                      onClick={logout}
-                      className="cursor-pointer hover:text-black"
-                    >
-                      Logout
-                    </p>
+                <div className="absolute right-0 pt-3 z-50">
+                  <div className="flex flex-col gap-1 w-40 py-2 px-3 bg-white text-gray-800 rounded-xl shadow-xl border border-gray-100 z-50">
+                    {token ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            router.push("/profile");
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors"
+                        >
+                          My Profile
+                        </button>
+                        <button
+                          onClick={logout}
+                          className="w-full text-left px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                        >
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            router.push("/login");
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg hover:bg-green-50 hover:text-green-700 transition-colors"
+                        >
+                          Login / Sign Up
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
